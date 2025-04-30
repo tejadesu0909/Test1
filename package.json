@@ -2,7 +2,9 @@
   "name": "business-tracker",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://tejadesu0099.github.io/business-tracker",
+  // "homepage": "https://tejadesu0099.github.io/business-tracker",
+  "homepage": "https://tejadesu0099.github.io/BusinesTracker",
+
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
