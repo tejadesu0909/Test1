@@ -126,3 +126,23 @@ button.toggle-btn.hide:hover {
   border-color: #007bff;
   outline: none;
 }
+
+
+.transaction-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 200px;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}

@@ -1,37 +1,39 @@
 import React, { useState } from 'react';
-// import './SummaryView.css'; // optional, if you're separating styles
 
 const SummaryView = ({ transactions }) => {
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
 
-  const getYear = (date) => new Date(date).getFullYear();
-  const getMonth = (date) => new Date(date).getMonth() + 1;
+  const getYear = (dateStr) => parseInt(dateStr.split('-')[0], 10);
+  const getMonth = (dateStr) => parseInt(dateStr.split('-')[1], 10); // 1-based
 
-  const allYears = [...new Set(transactions.map(t => getYear(t.date)))];
+  const allYears = [...new Set(transactions.map(t => getYear(t.date)))].sort();
   const allMonths = [...new Set(
     transactions
       .filter(t => getYear(t.date) === Number(selectedYear))
       .map(t => getMonth(t.date))
-  )];
+  )].sort((a, b) => a - b);
 
-  const filteredTransactions = transactions.filter(
-    t => getYear(t.date) === Number(selectedYear) && getMonth(t.date) === Number(selectedMonth)
+  const filtered = transactions.filter(
+    t =>
+      getYear(t.date) === Number(selectedYear) &&
+      getMonth(t.date) === Number(selectedMonth)
   );
 
-  const summaryByDate = {};
-  filteredTransactions.forEach(txn => {
-    const date = txn.date;
-    if (!summaryByDate[date]) {
-      summaryByDate[date] = { restaurant: 0, other: 0, sales: 0 };
+  // ✅ Group by date
+  const groupedByDate = {};
+  filtered.forEach((txn) => {
+    const { date, type, amount } = txn;
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = { restaurant: 0, other: 0, sales: 0 };
     }
-
-    if (txn.type === 'Restaurant Expense') summaryByDate[date].restaurant += txn.amount;
-    else if (txn.type === 'Other Expense') summaryByDate[date].other += txn.amount;
-    else if (txn.type === 'Sales') summaryByDate[date].sales += txn.amount;
+    if (type === 'Restaurant Expense') groupedByDate[date].restaurant += amount;
+    else if (type === 'Other Expense') groupedByDate[date].other += amount;
+    else if (type === 'Sales') groupedByDate[date].sales += amount;
   });
 
-  const dates = Object.keys(summaryByDate).sort();
+  const sortedDates = Object.keys(groupedByDate).sort();
+
   let totalRestaurant = 0;
   let totalOther = 0;
 
@@ -39,7 +41,6 @@ const SummaryView = ({ transactions }) => {
     <div>
       <h2>Summary</h2>
 
-      {/* Styled Year/Month Filters */}
       <div className="summary-filters">
         <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
           <option value="">Select Year</option>
@@ -77,26 +78,23 @@ const SummaryView = ({ transactions }) => {
             </tr>
           </thead>
           <tbody>
-            {dates.map((date) => {
-              const r = summaryByDate[date].restaurant;
-              const o = summaryByDate[date].other;
-              const s = summaryByDate[date].sales;
-              const expenses = r + o;
-              const profit = s - expenses;
-
-              totalRestaurant += r;
-              totalOther += o;
+            {sortedDates.map((date) => {
+              const { restaurant, other, sales } = groupedByDate[date];
+              const expenses = restaurant + other;
+              const profit = sales - expenses;
+              totalRestaurant += restaurant;
+              totalOther += other;
 
               return (
                 <tr key={date}>
                   <td>{date}</td>
-                  <td>{r}</td>
-                  <td>{o}</td>
-                  <td>{expenses}</td>
-                  <td>{s}</td>
-                  <td>{profit}</td>
-                  <td>{totalRestaurant}</td>
-                  <td>{totalOther}</td>
+                  <td>{restaurant.toFixed(2)}</td>
+                  <td>{other.toFixed(2)}</td>
+                  <td>{expenses.toFixed(2)}</td>
+                  <td>{sales.toFixed(2)}</td>
+                  <td>{profit.toFixed(2)}</td>
+                  <td>{totalRestaurant.toFixed(2)}</td>
+                  <td>{totalOther.toFixed(2)}</td>
                 </tr>
               );
             })}
